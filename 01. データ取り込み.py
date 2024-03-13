@@ -23,12 +23,15 @@
 # COMMAND ----------
 
 # DBTITLE 1,Unity Catalogにカタログ、スキーマ、ボリュームを無ければ作る
+# Catalogを新規に作成し、デフォルトで使用されるよう設定
 spark.sql(f"CREATE CATALOG IF NOT EXISTS {catalog_name}")
 spark.sql(f"USE CATALOG {catalog_name}")
 
+# Schemaを新規に作成し、デフォルトで使用されるよう設定
 spark.sql(f"CREATE SCHEMA IF NOT EXISTS {schema_name}")
 spark.sql(f"USE SCHEMA {schema_name}")
 
+# テーブル以外のファイルを格納するためのVolumeを作成
 spark.sql(f"CREATE VOLUME IF NOT EXISTS {catalog_name}.{schema_name}.{volume_name}")
 
 # COMMAND ----------
@@ -59,7 +62,8 @@ id2label = {}
 label2id = {}
 for label, category in enumerate(category_list):
   
-  file_names_list = sorted(glob.glob(f'{volume_path}/text/{category}/{category}*'))#対象メディアの記事が保存されているファイルのlistを取得します。
+  #対象メディアの記事が保存されているファイルのlistを取得します。
+  file_names_list = sorted(glob.glob(f'{volume_path}/text/{category}/{category}*'))
   print(f"{category}の記事を処理しています。　{category}に対応する番号は{label}で、データ個数は{len(file_names_list)}です。")
 
   id2label[label] = category
@@ -84,6 +88,7 @@ dataset_label_text.head()
 from pyspark.sql.functions import pandas_udf
 from pyspark.sql.types import StringType
 
+# 以下のようにPandasUDFを使用すると、Pythonで表現したロジックをSpark上で実行できるようになる
 @pandas_udf(StringType())
 def read_text(paths: pd.Series) -> pd.Series:
 
@@ -101,14 +106,9 @@ def read_text(paths: pd.Series) -> pd.Series:
 from pyspark.sql.functions import col
 
 dataset_df = spark.createDataFrame(dataset_label_text)
+# 上で作成したPandasUDFを適用
 dataset_df = dataset_df.withColumn('text', read_text(col('file_path')))
 display(dataset_df.head(5))
-
-# COMMAND ----------
-
-# DBTITLE 1,次のセル（SQL）に渡すために必要な変数をシステム変数としてセット
-spark.conf.set("my.catalogName", catalog_name)
-spark.conf.set("my.schemaName", schema_name)
 
 # COMMAND ----------
 

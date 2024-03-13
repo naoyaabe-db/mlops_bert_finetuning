@@ -5,7 +5,7 @@
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC # 0. ライブラリのインストール＆パラメーター設定
+# MAGIC # 0. パラメーター設定
 
 # COMMAND ----------
 
@@ -16,6 +16,7 @@
 
 import os
 
+# 自身のシークレットスコープ名、シークレット名に書き換える必要あり
 scope_name = "fieldeng"
 secret_name = "nabe-field-eng-ws"
 
@@ -78,6 +79,9 @@ eスポーツの人気は急速に拡大しており、プロゲーマーはそ�
 ]
 
 # COMMAND ----------
+
+import json
+import requests
 
 def score_model(input_text):
   url = 'https://e2-demo-field-eng.cloud.databricks.com/serving-endpoints/prod_nabe_bert_endpoint/invocations'

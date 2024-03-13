@@ -160,7 +160,7 @@ deploy_client = mlflow.deployments.get_deploy_client("databricks")
 # カスタムEmbeddingモデル
 for i in range(10):
   response = deploy_client.predict(
-    endpoint = f"prod_{serving_endpoint_name}", 
+    endpoint = serving_endpoint_name, 
     inputs = {"inputs": inputs}
   )
 
